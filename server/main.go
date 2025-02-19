@@ -1,24 +1,28 @@
 package main
 
 import (
-    "fmt"
+    "encoding/json"
     "log"
     "net/http"
+    "github.com/gin-gonic/gin"
     "github.com/gorilla/websocket"
 )
+
+type Message struct {
+    Type    string      `json:"type"`
+    Payload interface{} `json:"payload"`
+}
 
 var upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
     WriteBufferSize: 1024,
-    // Allow all origins for testing
     CheckOrigin: func(r *http.Request) bool {
         return true
     },
 }
 
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
-    // Upgrade HTTP connection to WebSocket
-    conn, err := upgrader.Upgrade(w, r, nil)
+func handleWebSocket(c *gin.Context) {
+    conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
     if err != nil {
         log.Printf("Failed to upgrade connection: %v", err)
         return
@@ -28,30 +32,44 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
     log.Printf("New WebSocket connection established")
 
     for {
-        // Read message from client
-        messageType, message, err := conn.ReadMessage()
+        // Read JSON message from client
+        _, rawMessage, err := conn.ReadMessage()
         if err != nil {
             log.Printf("Error reading message: %v", err)
             break
         }
-        
-        log.Printf("Received message: %s", message)
 
-        // Echo the message back
-        err = conn.WriteMessage(messageType, message)
-        if err != nil {
-            log.Printf("Error writing message: %v", err)
+        var clientMsg Message
+        if err := json.Unmarshal(rawMessage, &clientMsg); err != nil {
+            log.Printf("Error parsing JSON: %v", err)
+            continue
+        }
+
+        log.Printf("Received message: %+v", clientMsg)
+
+        // Prepare server response
+        response := Message{
+            Type:    "server_response",
+            Payload: map[string]interface{}{
+                "received": clientMsg.Payload,
+                "status":  "ok",
+            },
+        }
+
+        // Send JSON response back
+        if err := conn.WriteJSON(response); err != nil {
+            log.Printf("Error writing response: %v", err)
             break
         }
     }
 }
 
 func main() {
-    http.HandleFunc("/ws", handleWebSocket)
+    r := gin.Default()
+    r.GET("/ws", handleWebSocket)
     
-    port := ":8080"
-    fmt.Printf("WebSocket server starting on %s\n", port)
-    if err := http.ListenAndServe(port, nil); err != nil {
+    log.Printf("WebSocket server starting on :8080")
+    if err := r.Run(":8080"); err != nil {
         log.Fatal("ListenAndServe: ", err)
     }
 }
