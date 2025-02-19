@@ -15,13 +15,6 @@ read -r -d '' JSON_MESSAGE <<'EOF'
 }
 EOF
 
-# Extract values from JSON
-REPO_URL=$(echo "$JSON_MESSAGE" | jq -r '.repoURL')
-COMMIT_HASH=$(echo "$JSON_MESSAGE" | jq -r '.commitHash')
-
-# Handle git operations
-./git_handler.sh "$REPO_URL" "$COMMIT_HASH"
-
 # Send JSON message using wscat
 echo "Sending message: $JSON_MESSAGE"
 echo "$JSON_MESSAGE" | wscat -c ws://localhost:8080/ws
