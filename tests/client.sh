@@ -6,15 +6,12 @@
 echo "Connecting to WebSocket server..."
 
 # Prepare JSON message
-read -r -d '' JSON_MESSAGE << 'EOF'
+read -r -d '' JSON_MESSAGE <<'EOF'
 {
-    "type": "client_message",
-    "payload": {
-        "message": "Hello Server!",
-        "data": {
-            "test": true
-        }
-    }
+    "userId": "someId",
+    "chatId": "chatId",
+    "repoURL": "https://github.com/obiMadu/hng12-stage2",
+    "commitHash": "2acf0f9a74b83bc881aa2f06235b8c927892d28a",
 }
 EOF
 

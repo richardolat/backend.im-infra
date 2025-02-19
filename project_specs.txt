@@ -1,0 +1,13 @@
+#Project Specs
+
+Project Features
+## Orchestration App
+Build an app with golang
+
+### Note, Ignore: Between the App and Backend.im
+Implement websockets for communication with backend.im
+Implement:
+A server: Write Golang code that implements a websocket connection
+A client: Write a bash script that simulates the function of a client, put this into a tests folder
+I need the simplest barebones implementation of the websocket protocol in go, along with a client that initiates an active connection. So i'd like to pass some basic info from the client to the server and back once the connection is innitiated. This can be an echo impementation where they just echo back what each sends the other.
+
