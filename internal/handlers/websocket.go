@@ -36,27 +36,38 @@ func (h *WebSocketHandler) HandleConnection(c *gin.Context) {
     }
     defer conn.Close()
 
-    log.Printf("New WebSocket connection established")
+    log.Printf("New WebSocket connection established from %s", c.Request.RemoteAddr)
 
     for {
-        _, rawMessage, err := conn.ReadMessage()
+        messageType, rawMessage, err := conn.ReadMessage()
         if err != nil {
-            log.Printf("Error reading message: %v", err)
+            log.Printf("Error reading message from %s: %v", c.Request.RemoteAddr, err)
             break
         }
 
-        log.Printf("Raw message received: %s", string(rawMessage))
+        log.Printf("[%s] Raw message received (type: %d): %s", 
+            c.Request.RemoteAddr, 
+            messageType, 
+            string(rawMessage))
 
         var gitMsg models.GitMessage
         if err := json.Unmarshal(rawMessage, &gitMsg); err != nil {
-            log.Printf("Error parsing JSON: %v", err)
+            log.Printf("[%s] Error parsing JSON: %v", c.Request.RemoteAddr, err)
+            log.Printf("[%s] Invalid JSON content: %s", c.Request.RemoteAddr, string(rawMessage))
             sendError(conn, "Invalid message format")
             continue
         }
 
+        log.Printf("[%s] Parsed message: %+v", c.Request.RemoteAddr, gitMsg)
+
         // Handle git operations
+        log.Printf("[%s] Starting git operation for repo: %s at commit: %s", 
+            c.Request.RemoteAddr, 
+            gitMsg.RepoURL, 
+            gitMsg.CommitHash)
+
         if err := h.gitService.HandleRepository(gitMsg.RepoURL, gitMsg.CommitHash); err != nil {
-            log.Printf("Git operation failed: %v", err)
+            log.Printf("[%s] Git operation failed: %v", c.Request.RemoteAddr, err)
             sendError(conn, "Git operation failed")
             continue
         }
