@@ -15,8 +15,20 @@ read -r -d '' JSON_MESSAGE <<'EOF'
 }
 EOF
 
-# Send JSON message and keep connection open interactively
+# Create a named pipe
+FIFO=$(mktemp -u)
+mkfifo "$FIFO"
+
+# Start wscat in background reading from FIFO
+wscat -c ws://localhost:8080/ws < "$FIFO" &
+
+# Send message and keep connection open
 echo "Starting WebSocket session (Ctrl+C to exit)..."
-wscat -c ws://localhost:8080/ws <<EOF
-$JSON_MESSAGE
-EOF
+echo "$JSON_MESSAGE" > "$FIFO"
+ 
+# Keep script running and reading responses
+sleep 1  # Give time for initial response
+tail -f "$FIFO"  # Keep pipe open for reading responses
+
+# Cleanup
+rm "$FIFO"
