@@ -6,6 +6,8 @@ import (
     "net/http"
     "github.com/gin-gonic/gin"
     "github.com/gorilla/websocket"
+    "websocket-git/internal/models"
+    "websocket-git/internal/services"
 )
 
 type WebSocketHandler struct {
