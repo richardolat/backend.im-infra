@@ -15,6 +15,8 @@ read -r -d '' JSON_MESSAGE <<'EOF'
 }
 EOF
 
-# Send JSON message using wscat
-echo "Sending message: $JSON_MESSAGE"
-echo "$JSON_MESSAGE" | wscat -c ws://localhost:8080/ws
+# Send JSON message and keep connection open interactively
+echo "Starting WebSocket session (Ctrl+C to exit)..."
+wscat -c ws://localhost:8080/ws <<EOF
+$JSON_MESSAGE
+EOF
