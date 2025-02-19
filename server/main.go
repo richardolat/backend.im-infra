@@ -39,6 +39,9 @@ func handleWebSocket(c *gin.Context) {
             break
         }
 
+        // Log the raw message
+        log.Printf("Raw message received: %s", string(rawMessage))
+
         var clientMsg Message
         if err := json.Unmarshal(rawMessage, &clientMsg); err != nil {
             log.Printf("Error parsing JSON: %v", err)
