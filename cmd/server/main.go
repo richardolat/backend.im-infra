@@ -18,10 +18,8 @@ func main() {
 	// Initialize handlers
 	wsHandler := handlers.NewWebSocketHandler(gitService)
 
-	// Setup router with logger and recovery middleware
-	r := gin.New()
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
+	// Setup router with default middleware (Logger and Recovery)
+	r := gin.Default()
 	r.GET("/ws", wsHandler.HandleConnection)
 
 	log.Printf("WebSocket server starting on :8080")
