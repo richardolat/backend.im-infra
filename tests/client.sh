@@ -6,8 +6,18 @@
 echo "Connecting to WebSocket server..."
 
 # Prepare JSON message
-JSON_MESSAGE='{"type":"client_message","payload":{"message":"Hello Server!","data":{"test":true}}}'
+read -r -d '' JSON_MESSAGE << 'EOF'
+{
+    "type": "client_message",
+    "payload": {
+        "message": "Hello Server!",
+        "data": {
+            "test": true
+        }
+    }
+}
+EOF
 
 # Send JSON message using wscat
 echo "Sending message: $JSON_MESSAGE"
-echo $JSON_MESSAGE | wscat -c ws://localhost:8080/ws
+echo "$JSON_MESSAGE" | wscat -c ws://localhost:8080/ws
