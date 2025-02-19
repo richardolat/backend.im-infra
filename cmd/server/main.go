@@ -3,8 +3,9 @@ package main
 import (
     "log"
     "github.com/gin-gonic/gin"
-    "websocket-git/internal/handlers"
-    "websocket-git/internal/services"
+    "github.com/gorilla/websocket"
+    "./internal/handlers"
+    "./internal/services"
 )
 
 func main() {
