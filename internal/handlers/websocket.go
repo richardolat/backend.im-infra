@@ -11,11 +11,11 @@ import (
 )
 
 type WebSocketHandler struct {
-    upgrader   websocket.Upgrader
-    gitService *services.GitService
+    upgrader         websocket.Upgrader
+    namespaceService *services.NamespaceService
 }
 
-func NewWebSocketHandler(gitService *services.GitService) *WebSocketHandler {
+func NewWebSocketHandler(namespaceService *services.NamespaceService) *WebSocketHandler {
     return &WebSocketHandler{
         upgrader: websocket.Upgrader{
             ReadBufferSize:  1024,
@@ -60,25 +60,17 @@ func (h *WebSocketHandler) HandleConnection(c *gin.Context) {
 
         log.Printf("[%s] Parsed message: %+v", c.Request.RemoteAddr, gitMsg)
 
-        // Handle git operations
-        log.Printf("[%s] Starting git operation for repo: %s at commit: %s", 
-            c.Request.RemoteAddr, 
-            gitMsg.RepoURL, 
-            gitMsg.CommitHash)
-
-        if err := h.gitService.HandleRepository(gitMsg.RepoURL, gitMsg.CommitHash); err != nil {
-            log.Printf("[%s] Git operation failed: %v", c.Request.RemoteAddr, err)
-            sendError(conn, "Git operation failed")
+        // Handle namespace operations
+        result, err := h.namespaceService.HandleNamespace(gitMsg.ChatID, gitMsg.UserID)
+        if err != nil {
+            log.Printf("[%s] Namespace operation failed: %v", c.Request.RemoteAddr, err)
+            sendError(conn, "Namespace operation failed: "+err.Error())
             continue
         }
 
         response := models.Response{
-            Type: "success",
-            Payload: map[string]interface{}{
-                "message": "Git operation completed successfully",
-                "repoURL": gitMsg.RepoURL,
-                "commit":  gitMsg.CommitHash,
-            },
+            Type:    "namespace_status",
+            Payload: result,
         }
 
         if err := conn.WriteJSON(response); err != nil {

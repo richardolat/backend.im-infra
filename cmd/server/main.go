@@ -13,10 +13,10 @@ func main() {
 	gin.SetMode(gin.DebugMode)
 
 	// Initialize services
-	gitService := services.NewGitService()
+	namespaceService := services.NewNamespaceService()
 
 	// Initialize handlers
-	wsHandler := handlers.NewWebSocketHandler(gitService)
+	wsHandler := handlers.NewWebSocketHandler(namespaceService)
 
 	// Setup router with default middleware (Logger and Recovery)
 	r := gin.Default()
