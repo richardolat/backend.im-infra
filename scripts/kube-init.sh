@@ -39,3 +39,6 @@ kubectl version --client -o json | jq -r '.clientVersion.gitVersion'
 # Verify AWS credentials
 echo "AWS Identity:"
 aws sts get-caller-identity
+
+# Execute the passed command
+exec "$@"

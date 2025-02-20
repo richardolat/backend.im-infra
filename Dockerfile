@@ -54,5 +54,5 @@ ENV KUBECONFIG=/home/backenduser/.kube/config \
 USER backenduser
 
 HEALTHCHECK --interval=30s --timeout=3s CMD scripts/healthcheck.sh
-ENTRYPOINT ["/app/scripts/kube-init.sh"]
+ENTRYPOINT ["/app/scripts/kube-init.sh", "--"]
 CMD ["./backendim-brain"]
