@@ -2,3 +2,6 @@
 *.pem
 .aider*
 repos
+keys
+repos-data
+kube-config
