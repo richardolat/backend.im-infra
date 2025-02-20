@@ -9,6 +9,8 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME}
+    expose:
+      - "8080"
     ports:
       - "8080:8080"
     volumes:
