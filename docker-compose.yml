@@ -37,7 +37,6 @@ services:
   backendim-brain:
     image: backendim-brain
     build: .
-    env_file: .env
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -52,9 +51,6 @@ services:
       - "traefik.enable=true"
       # service
       - "traefik.http.services.backendim-brain.loadbalancer.server.port=8080"
-      - "traefik.http.routers.backendim-brain.middlewares=retry"
-      - "traefik.http.middlewares.retry.retry.attempts=3"
-      - "traefik.http.middlewares.retry.retry.initialinterval=5s"
       # http
       - "traefik.http.routers.backendim-brain-http.entrypoints=web"
       - "traefik.http.routers.backendim-brain-http.rule=Host(`${DOMAIN}`)"
