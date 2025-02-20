@@ -14,29 +14,36 @@ class TestRunner:
         self.pod_name = ""
 
     def run_kubectl(self, command: List[str], check: bool = True) -> subprocess.CompletedProcess:
-        """Execute a kubectl command with error handling"""
+        """Execute a kubectl command with proper namespace handling"""
+        full_command = ["kubectl", "-n", self.namespace] + command
         result = subprocess.run(
-            ["kubectl", "-n", self.namespace] + command,
+            full_command,  # Fixed: Use constructed command with namespace
             capture_output=True,
             text=True
         )
         if check and result.returncode != 0:
-            print(f"⚠️ Command failed: {' '.join(command)}")
+            print(f"⚠️ Command failed: {' '.join(full_command)}")
             print(f"Stderr: {result.stderr.strip()}")
             sys.exit(1)
         return result
 
     def setup_pod(self):
-        """Deploy and wait for test pod"""
+        """Deploy test pod with proper namespace reference"""
         print(f"🚀 Deploying test pod to namespace {self.namespace}")
-        self.run_kubectl(["apply", "-f", "deployments/templates/test-pod.yaml"])
+        try:
+            # Apply deployment to specified namespace
+            self.run_kubectl(["apply", "-f", "deployments/templates/test-pod.yaml"])
+            
+            print("⏳ Waiting for pod to be ready...")
+            self.run_kubectl(["wait", "--for=condition=Ready", "pod", "-l", "app=test-pod", "--timeout=120s"])
+            
+            # Get pod name from specified namespace
+            result = self.run_kubectl(["get", "pod", "-l", "app=test-pod", "-o", "jsonpath={.items[0].metadata.name}"])
+            self.pod_name = result.stdout.strip()
         
-        print("⏳ Waiting for pod to be ready...")
-        self.run_kubectl(["wait", "--for=condition=Ready", "pod", "-l", "app=test-pod", "--timeout=120s"])
-        
-        # Get pod name
-        result = self.run_kubectl(["get", "pod", "-l", "app=test-pod", "-o", "jsonpath={.items[0].metadata.name}"])
-        self.pod_name = result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to setup pod: {e.stderr}")
+            sys.exit(1)
 
     def cleanup(self):
         """Clean up Kubernetes resources"""
@@ -55,9 +62,9 @@ class TestRunner:
         self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
                         f"cd /app/repo && git checkout {commit}"])
         
-        # Install dependencies
+        # Install dependencies with quiet mode
         self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
-                        "cd /app/repo && pip install -r requirements.txt"])
+                        "cd /app/repo && pip install --quiet -r requirements.txt"])
         
         # Execute tests
         print(f"⚙️ Executing: {self.test_cmd}")
