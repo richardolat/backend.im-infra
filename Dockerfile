@@ -16,11 +16,11 @@ RUN apk add --no-cache \
     curl \
     python3 \
     py3-pip \
+    py3-venv \
     git \
     bash \
     jq \
-    libc6-compat \
-    py3-cryptography
+    libc6-compat
 
 # Install security tools
 RUN apk add --no-cache --virtual .security-deps \
