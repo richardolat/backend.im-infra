@@ -1,10 +1,11 @@
 package models
 
 type GitMessage struct {
-    UserID     string `json:"userId"`
-    ChatID     string `json:"chatId"`
-    RepoURL    string `json:"repoURL"`
-    CommitHash string `json:"commitHash"`
+    UserID      string `json:"userId"`
+    ChatID      string `json:"chatId"`
+    RepoURL     string `json:"repoURL"`
+    CommitHash  string `json:"commitHash"`
+    ProjectType string `json:"projectType"`
 }
 
 type Response struct {

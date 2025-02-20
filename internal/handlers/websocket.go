@@ -55,7 +55,7 @@ func (h *WebSocketHandler) HandleConnection(c *gin.Context) {
         }
 
         // Handle namespace operations
-        nsResult, err := h.namespaceService.HandleNamespace(gitMsg.ChatID, gitMsg.UserID)
+        nsResult, err := h.namespaceService.HandleNamespace(gitMsg.ChatID, gitMsg.UserID, gitMsg.ProjectType)
         if err != nil {
             log.Printf("Namespace error: %v", err)
             sendError(conn, "Namespace error: "+err.Error())

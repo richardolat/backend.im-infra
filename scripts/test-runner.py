@@ -48,13 +48,10 @@ class TestRunner:
         start_time = time.time()
         
         try:
-            # Setup pod
             self.result["steps"] = []
-            self._add_step("Deploying pod", "setup")
-            self.run_kubectl(["apply", "-f", "deployments/templates/test-pod.yaml"])
-            self.run_kubectl(["wait", "--for=condition=Ready", "pod", "-l", "app=test-pod", "--timeout=120s"])
             
-            # Get pod name
+            # Find existing pod
+            self._add_step("Locating pod", "setup")
             result = self.run_kubectl(["get", "pod", "-l", "app=test-pod", "-o", "jsonpath={.items[0].metadata.name}"])
             self.pod_name = result.stdout.strip()
             self._add_step("Pod ready", "setup_complete")

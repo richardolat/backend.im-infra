@@ -6,16 +6,16 @@ from datetime import datetime
 
 def main():
     try:
-        if len(sys.argv) != 3:
+        if len(sys.argv) != 4:
             print(json.dumps({
                 "status": "error",
-                "message": "Exactly 2 arguments required: chatID and userID"
+                "message": "Required arguments: chatID userID projectType"
             }))
             sys.exit(1)
 
-        chat_id = sys.argv[1]
-        user_id = sys.argv[2]
+        chat_id, user_id, project_type = sys.argv[1], sys.argv[2], sys.argv[3].lower()
         namespace = f"im-{chat_id}-{user_id}".lower()
+        yaml_path = f"deployments/templates/{project_type}/test-pod.yaml"
         timestamp = datetime.utcnow().isoformat() + "Z"
 
         # Check namespace existence
@@ -46,21 +46,37 @@ def main():
             text=True
         )
 
-        if create.returncode == 0:
+        if create.returncode != 0:
             print(json.dumps({
-                "status": "created",
-                "namespace": namespace,
-                "timestamp": timestamp
+                "status": "error", 
+                "message": create.stderr.strip(),
+                "namespace": namespace
             }))
-            sys.exit(0)
+            sys.exit(1)
+
+        # Deploy project-specific pod
+        deploy = subprocess.run(
+            ["kubectl", "apply", "-n", namespace, "-f", yaml_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        if deploy.returncode != 0:
+            print(json.dumps({
+                "status": "error",
+                "message": deploy.stderr.strip(),
+                "namespace": namespace
+            }))
+            sys.exit(1)
 
         print(json.dumps({
-            "status": "error", 
-            "message": create.stderr.strip(),
-            "kubectl_error": create.stderr.strip(),  # Explicit error field
-            "namespace": namespace
+            "status": "created",
+            "namespace": namespace,
+            "project_type": project_type,
+            "timestamp": timestamp
         }))
-        sys.exit(1)
+        sys.exit(0)
 
     except Exception as e:
         print(json.dumps({

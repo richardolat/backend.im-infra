@@ -19,8 +19,8 @@ func NewNamespaceService() *NamespaceService {
 	}
 }
 
-func (s *NamespaceService) HandleNamespace(chatID, userID string) (map[string]interface{}, error) {
-	cmd := exec.Command("python3", s.ScriptPath, chatID, userID)
+func (s *NamespaceService) HandleNamespace(chatID, userID, projectType string) (map[string]interface{}, error) {
+	cmd := exec.Command("python3", s.ScriptPath, chatID, userID, projectType)
 	output, err := cmd.CombinedOutput()
 	
 	// Enhanced error logging
