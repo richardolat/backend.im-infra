@@ -10,20 +10,20 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /backendim-brain ./cmd/server
 FROM alpine:3.19
 WORKDIR /app
 
-# Install core dependencies with verified versions
+# Install core dependencies
 RUN apk add --no-cache \
-  ca-certificates=20241121-r1 \
-  curl=8.12.1-r0 \
-  python3=3.11.11-r0 \
-  py3-pip=23.3.1-r0 \
-  git=2.43.6-r0 \
-  bash=5.2.21-r0 \
-  jq=1.7.1-r0
+    ca-certificates \
+    curl \
+    python3 \
+    py3-pip \
+    git \
+    bash \
+    jq
 
-# Install security tools with verified versions
+# Install security tools
 RUN apk add --no-cache --virtual .security-deps \
-  openssl=3.1.4-r5 \
-  libcrypto3=3.1.4-r5
+    openssl \
+    libcrypto3
 
 # Install AWS CLI and kubectl
 COPY scripts/install-awscli.sh scripts/install-kubectl.sh /tmp/
