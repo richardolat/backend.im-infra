@@ -44,7 +44,7 @@ services:
       - KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME}
     volumes:
       - repos-data:/app/repos
-      - kube-config:/root/.kube
+      - kube-config:/home/backenduser/.kube
     networks:
       - backend-net
     labels:

@@ -28,6 +28,10 @@ if ! kubectl cluster-info --request-timeout=10s; then
     exit 1
 fi
 
+echo "Setting kubeconfig permissions..."
+chmod 0600 ${KUBECONFIG}
+chown backenduser:backenduser ${KUBECONFIG}
+
 # Verify kubectl version
 echo "Kubectl Version:"
 kubectl version --client -o json | jq -r '.clientVersion.gitVersion'

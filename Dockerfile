@@ -40,14 +40,16 @@ COPY scripts/ ./scripts/
 # Security hardening
 RUN find ./scripts/ -type f -name '*.sh' -exec chmod 0755 {} + && \
     adduser -D -u 1001 backenduser && \
-    chown -R backenduser:backenduser /app && \
-    mkdir -p /root/.aws /root/.kube && \
-    chmod 0700 /root/.aws /root/.kube
+    mkdir -p /home/backenduser/.kube /home/backenduser/.aws && \
+    chown -R backenduser:backenduser /app /home/backenduser && \
+    chmod 0700 /home/backenduser/.kube /home/backenduser/.aws
 
-ENV KUBECONFIG=/root/.kube/config \
-  AWS_EC2_METADATA_DISABLED=true \
-  PATH="/app/scripts:${PATH}" \
-  GIT_SSL_NO_VERIFY="false"
+ENV KUBECONFIG=/home/backenduser/.kube/config \
+    AWS_CONFIG_FILE=/home/backenduser/.aws/config \
+    AWS_SHARED_CREDENTIALS_FILE=/home/backenduser/.aws/credentials \
+    AWS_EC2_METADATA_DISABLED=true \
+    PATH="/app/scripts:${PATH}" \
+    GIT_SSL_NO_VERIFY="false"
 
 USER backenduser
 
