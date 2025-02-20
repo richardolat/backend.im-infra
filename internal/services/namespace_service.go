@@ -29,7 +29,16 @@ func (s *NamespaceService) HandleNamespace(chatID, userID string) (map[string]in
 		return nil, fmt.Errorf("script execution failed: %w (output: %s)", err, string(output))
 	}
 
+	// Clean output and filter for JSON lines
 	cleanedOutput := bytes.TrimSpace(output)
+	if lines := bytes.Split(cleanedOutput, []byte{'\n'}); len(lines) > 1 {
+		for _, line := range lines {
+			if bytes.HasPrefix(line, []byte{'{'}) {
+				cleanedOutput = line
+				break
+			}
+		}
+	}
 	log.Printf("Namespace handler raw output: %q", cleanedOutput)
 
 	var result map[string]interface{}

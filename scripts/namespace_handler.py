@@ -26,8 +26,8 @@ def main():
             text=True
         )
 
-        # Add kubectl error logging for check command
-        if check.returncode != 0:
+        # Only log errors if the check wasn't a normal "not found" case
+        if check.returncode != 0 and "NotFound" not in check.stderr:
             sys.stderr.write(f"kubectl check error: {check.stderr.strip()}\n")
 
         if check.returncode == 0:
