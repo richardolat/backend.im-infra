@@ -9,6 +9,7 @@ A production-grade system for managing Git repositories and Kubernetes clusters 
 ## 🌐 System Overview
 
 ### Core Components
+
 1. **WebSocket Server** (Go/Gin) - Handles real-time client connections
 2. **Git Service** - Manages repository operations via `git_handler.sh`
 3. **Kubernetes Integrator** - Handles cluster auth via `kube-init.sh`
@@ -34,13 +35,15 @@ sequenceDiagram
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - AWS Account with EKS cluster
 - Domain name with DNS pointing to your server
 - Docker 20.10+ and docker-compose 1.29+
 
 ### Installation
+
 ```bash
-git clone https://github.com/yourorg/backendim-brain.git
+git clone https://github.com/obiMadu/backend.im-infra.git
 cd backendim-brain
 cp .env.example .env
 nano .env  # Configure credentials
@@ -51,6 +54,7 @@ docker compose up -d
 ## 🔧 Configuration
 
 ### Environment Variables (.env)
+
 | Variable                  | Description                                | Example                     |
 |---------------------------|--------------------------------------------|-----------------------------|
 | `AWS_ACCESS_KEY_ID`       | IAM Access Key                             | AKIAXXXXXXXXXXXXXXXX        |
@@ -58,9 +62,10 @@ docker compose up -d
 | `AWS_DEFAULT_REGION`      | AWS Region                                 | us-west-2                   |
 | `KUBE_CLUSTER_NAME`       | EKS Cluster Name                           | production-cluster          |
 | `DOMAIN`                  | Public FQDN                                | gitops.example.com          |
-| `ACME_EMAIL`              | Let's Encrypt Email                        | admin@example.com           |
+| `ACME_EMAIL`              | Let's Encrypt Email                        | <admin@example.com>           |
 
 ### File Structure
+
 ```
 .
 ├── cmd/                  # Go application entrypoints
@@ -78,9 +83,11 @@ docker compose up -d
 ## 📡 API Specification
 
 ### WebSocket Endpoint
+
 `wss://<DOMAIN>/ws`
 
 ### Message Format
+
 ```json
 {
   "userId": "unique-user-id",
@@ -91,6 +98,7 @@ docker compose up -d
 ```
 
 ### Response Types
+
 | Type       | Format                                  | Example Use Case              |
 |------------|-----------------------------------------|--------------------------------|
 | Success    | `{type: "success", payload: {}}`       | Completed Git operation        |
@@ -100,6 +108,7 @@ docker compose up -d
 ## 🛠️ Operations
 
 ### Key Commands
+
 ```bash
 # View live logs
 docker compose logs -f
@@ -118,6 +127,7 @@ docker compose exec backendim-brain kubectl get nodes
 ```
 
 ### Monitoring Endpoints
+
 | Endpoint                  | Description                       | Access                        |
 |---------------------------|-----------------------------------|-------------------------------|
 | `:8080/health`            | Service health status             | Internal only                 |
@@ -127,18 +137,21 @@ docker compose exec backendim-brain kubectl get nodes
 ## 🔒 Security Architecture
 
 ### Protection Layers
+
 1. **Network Security**
    - TLS 1.3 via Let's Encrypt
    - Isolated Docker networks
    - Port 80 auto-redirect to 443
 
 2. **Runtime Security**
+
    ```dockerfile
    USER backenduser  # Non-root execution
    RUN chmod 0700 /home/backenduser/.kube
    ```
 
 3. **Secret Management**
+
    ```bash
    # .gitignore protected patterns
    *.key
@@ -147,6 +160,7 @@ docker compose exec backendim-brain kubectl get nodes
    ```
 
 ### Audit Controls
+
 ```bash
 # Verify file permissions
 docker compose exec backendim-brain \
@@ -160,7 +174,9 @@ docker compose exec backendim-brain \
 ## 🚨 Troubleshooting Guide
 
 ### Common Issues
+
 **WebSocket Connection Fails**
+
 ```bash
 # Verify DNS records
 dig +short $DOMAIN
@@ -170,6 +186,7 @@ openssl s_client -connect $DOMAIN:443 -servername $DOMAIN
 ```
 
 **Kubernetes Auth Failure**
+
 ```bash
 # Test cluster access
 docker compose exec backendim-brain \
@@ -177,6 +194,7 @@ docker compose exec backendim-brain \
 ```
 
 **Git Operations Hanging**
+
 ```bash
 # Check repository storage
 docker compose exec backendim-brain \
@@ -189,6 +207,7 @@ docker compose exec backendim-brain git --version
 ## 📈 Performance Tuning
 
 ### Recommended Deployment
+
 ```yaml
 # docker-compose.override.yml
 services:
@@ -204,11 +223,15 @@ services:
 ```
 
 ### Scaling Strategy
+
 1. **Horizontal Scaling**
+
    ```bash
    docker compose up -d --scale backendim-brain=5
    ```
+
 2. **Resource Limits**
+
    ```yaml
    reservations:
      cpus: '0.5'
@@ -218,14 +241,19 @@ services:
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. Create feature branch
+
    ```bash
    git checkout -b feature/new-handler
    ```
+
 2. Run local stack
+
    ```bash
    docker compose -f docker-compose.dev.yml up
    ```
+
 3. Submit PR with:
    - Updated tests
    - Documentation changes
@@ -233,6 +261,6 @@ services:
 
 ---
 
-**Maintainers**: [Your Team Name]  
+**Maintainers**: Obi Madu  
 **Status**: Production Ready (v1.3.0)  
 **Last Updated**: 2024-02-20
