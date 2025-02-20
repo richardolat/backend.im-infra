@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backendim-brain:
+    image: backendim-brain
+    build: .
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET}
+      - AWS_DEFAULT_REGION=${AWS_REGION}
+      - KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME}
+    volumes:
+      - repos-data:/app/repos
+      - kube-config:/root/.kube
+    networks:
+      - backend-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backendim-brain.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.backendim-brain.entrypoints=websecure"
+      - "traefik.http.routers.backendim-brain.tls=true"
+      - "traefik.http.routers.backendim-brain.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backendim-brain.loadbalancer.server.port=8080"
+
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik-cert:/acme.json
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - backend-net
+
+volumes:
+  repos-data:
+  kube-config:
+  traefik-cert:
+
+networks:
+  backend-net:
+    driver: bridge
