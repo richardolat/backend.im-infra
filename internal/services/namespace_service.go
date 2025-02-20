@@ -14,7 +14,7 @@ type NamespaceService struct {
 
 func NewNamespaceService() *NamespaceService {
 	return &NamespaceService{
-		ScriptPath: filepath.Join("scripts", "namespace_handler.sh"),
+		ScriptPath: filepath.Join("scripts", "namespace_handler.py"),
 	}
 }
 
@@ -22,13 +22,7 @@ func (s *NamespaceService) HandleNamespace(chatID, userID string) (map[string]in
 	// Construct the identifier argument for the script
 	identifier := fmt.Sprintf("%s-%s", chatID, userID)
 	
-	// Make script executable
-	if err := exec.Command("chmod", "+x", s.ScriptPath).Run(); err != nil {
-		return nil, fmt.Errorf("failed to make script executable: %v", err)
-	}
-
-	// Execute the script
-	cmd := exec.Command(s.ScriptPath, identifier)
+	cmd := exec.Command("python3", s.ScriptPath, identifier)
 	output, err := cmd.CombinedOutput()
 	log.Printf("Namespace handler output: %s", string(output))
 
