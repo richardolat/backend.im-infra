@@ -12,7 +12,7 @@ import (
 
 type WebSocketHandler struct {
     upgrader         websocket.Upgrader
-    namespaceService *services.NamespaceService
+    namespaceService *services.NamespaceService  // Correct field name
 }
 
 func NewWebSocketHandler(namespaceService *services.NamespaceService) *WebSocketHandler {
@@ -21,10 +21,10 @@ func NewWebSocketHandler(namespaceService *services.NamespaceService) *WebSocket
             ReadBufferSize:  1024,
             WriteBufferSize: 1024,
             CheckOrigin: func(r *http.Request) bool {
-                return true
+                return true  // Adjust origin validation for production
             },
         },
-        gitService: gitService,
+        namespaceService: namespaceService,  // Remove gitService reference
     }
 }
 

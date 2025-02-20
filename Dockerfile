@@ -38,7 +38,7 @@ COPY --from=builder /backendim-brain .
 COPY scripts/ ./scripts/
 
 # Security hardening
-RUN find ./scripts/ -type f -name '*.sh' -exec chmod 0755 {} + && \
+RUN find ./scripts/ -type f \( -name '*.sh' -o -name '*.py' \) -exec chmod 0755 {} + && \
     adduser -D -u 1001 backenduser && \
     mkdir -p /home/backenduser/.kube /home/backenduser/.aws && \
     chown -R backenduser:backenduser /app /home/backenduser && \

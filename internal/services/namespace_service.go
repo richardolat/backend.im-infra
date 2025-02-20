@@ -19,22 +19,22 @@ func NewNamespaceService() *NamespaceService {
 }
 
 func (s *NamespaceService) HandleNamespace(chatID, userID string) (map[string]interface{}, error) {
-	// Construct the identifier argument for the script
-	identifier := fmt.Sprintf("%s-%s", chatID, userID)
-	
-	cmd := exec.Command("python3", s.ScriptPath, identifier)
-	output, err := cmd.CombinedOutput()
-	log.Printf("Namespace handler output: %s", string(output))
+    cmd := exec.Command("python3", s.ScriptPath, chatID, userID)
+    output, err := cmd.CombinedOutput()
+    
+    // Trim any empty lines from script output
+    cleanedOutput := bytes.TrimSpace(output)
+    
+    log.Printf("Namespace handler raw output: %q", cleanedOutput)
 
-	if err != nil {
-		return nil, fmt.Errorf("namespace handler failed: %v", err)
-	}
+    var result map[string]interface{}
+    if err := json.Unmarshal(cleanedOutput, &result); err != nil {
+        return nil, fmt.Errorf("failed to parse JSON output: %v\nRaw output: %s", err, cleanedOutput)
+    }
 
-	// Parse JSON output
-	var result map[string]interface{}
-	if err := json.Unmarshal(output, &result); err != nil {
-		return nil, fmt.Errorf("failed to parse script output: %v", err)
-	}
+    if status, ok := result["status"]; ok && status == "error" {
+        return result, fmt.Errorf("namespace handler error: %v", result["message"])
+    }
 
-	return result, nil
+    return result, nil
 }

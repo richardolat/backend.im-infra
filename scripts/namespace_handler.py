@@ -6,21 +6,23 @@ from datetime import datetime
 
 def main():
     try:
-        if len(sys.argv) < 2:
+        if len(sys.argv) != 3:
             print(json.dumps({
                 "status": "error",
-                "message": "Namespace identifier required"
+                "message": "Exactly 2 arguments required: chatID and userID"
             }))
             sys.exit(1)
 
-        identifier = sys.argv[1]
-        namespace = f"im-{identifier}".lower()
+        chat_id = sys.argv[1]
+        user_id = sys.argv[2]
+        namespace = f"im-{chat_id}-{user_id}".lower()
         timestamp = datetime.utcnow().isoformat() + "Z"
 
         # Check namespace existence
         check = subprocess.run(
             ["kubectl", "get", "namespace", namespace],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True
         )
 
@@ -35,7 +37,8 @@ def main():
         # Create namespace
         create = subprocess.run(
             ["kubectl", "create", "namespace", namespace],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True
         )
 
@@ -48,7 +51,7 @@ def main():
             sys.exit(0)
 
         print(json.dumps({
-            "status": "error",
+            "status": "error", 
             "message": create.stderr.strip(),
             "namespace": namespace
         }))
@@ -57,7 +60,7 @@ def main():
     except Exception as e:
         print(json.dumps({
             "status": "error",
-            "message": f"Handler failure: {str(e)}"
+            "message": f"Script execution failed: {str(e)}"
         }))
         sys.exit(1)
 
