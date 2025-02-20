@@ -13,9 +13,9 @@ spec:
         app: test-pod
     spec:
       containers:
-      - name: test-container
-        image: your-registry/test-env:latest
-        resources:
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
+        - name: test-container
+          image: obimadu/im-base-fastapi
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
