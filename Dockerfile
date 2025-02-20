@@ -18,7 +18,8 @@ RUN apk add --no-cache \
     py3-pip \
     git \
     bash \
-    jq
+    jq \
+    libc6-compat
 
 # Install security tools
 RUN apk add --no-cache --virtual .security-deps \
