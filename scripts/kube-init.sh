@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # Validate environment variables
-required_vars=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION KUBE_CLUSTER_NAME)
+required_vars=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION KUBE_CLUSTER_NAME)
 for var in "${required_vars[@]}"; do
     if [[ -z "${!var}" ]]; then
         echo "ERROR: Missing required environment variable $var" >&2
@@ -13,12 +13,12 @@ done
 # Configure AWS CLI credentials
 aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
 aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-aws configure set default.region ${AWS_REGION}
+aws configure set default.region ${AWS_DEFAULT_REGION}
 
 # Generate kubeconfig
 aws eks update-kubeconfig \
     --name ${KUBE_CLUSTER_NAME} \
-    --region ${AWS_REGION} \
+    --region ${AWS_DEFAULT_REGION} \
     --kubeconfig ${KUBECONFIG} \
     --alias automated-cluster
 
