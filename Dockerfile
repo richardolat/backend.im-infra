@@ -16,7 +16,6 @@ RUN apk add --no-cache \
     curl \
     python3 \
     py3-pip \
-    py3-venv \
     git \
     bash \
     jq \
