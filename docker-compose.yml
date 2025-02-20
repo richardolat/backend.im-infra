@@ -1,6 +1,39 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  traefik:
+    image: traefik:v2
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      # provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # metrics
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
+      - "--log.level=ERROR"
+      # logs
+      - "--accesslog=true"
+      # entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # certificatesresolvers
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    expose:
+      - "8080"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - backend-net
+
   backendim-brain:
     image: backendim-brain
     build: .
@@ -16,31 +49,25 @@ services:
       - backend-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backendim-brain.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.backendim-brain.entrypoints=websecure"
-      - "traefik.http.routers.backendim-brain.tls=true"
-      - "traefik.http.routers.backendim-brain.tls.certresolver=letsencrypt"
+      # service
       - "traefik.http.services.backendim-brain.loadbalancer.server.port=8080"
-
-  traefik:
-    image: traefik:v2.10
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - traefik-cert:/acme.json
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - backend-net
+      # http
+      - "traefik.http.routers.backendim-brain-http.entrypoints=web"
+      - "traefik.http.routers.backendim-brain-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.backendim-brain-http.service=backendim-brain"
+      # tls
+      - "traefik.http.routers.backendim-brain-https.tls=true"
+      - "traefik.http.routers.backendim-brain-https.tls.certresolver=myresolver"
+      - "traefik.http.routers.backendim-brain-https.entrypoints=websecure"
+      - "traefik.http.routers.backendim-brain-https.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.backendim-brain-https.service=backendim-brain"
+      # tls redirect
+      - "traefik.http.routers.backendim-brain-http.middlewares=redirect-https"
+      - "traefik.http.middlewares.redirect-https.redirectScheme.scheme=https"
+      - "traefik.http.middlewares.redirect-https.redirectScheme.permanent=true"
 
 volumes:
+  traefik_letsencrypt:
   repos-data:
   kube-config:
   traefik-cert:
