@@ -5,3 +5,5 @@ repos
 keys
 repos-data
 kube-config
+.env
+
