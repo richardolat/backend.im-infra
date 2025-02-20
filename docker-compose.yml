@@ -12,7 +12,7 @@ services:
     expose:
       - "8080"
     ports:
-      - "8080:8080"
+      - "8080:80"
     volumes:
       - repos-data:/app/repos
       - kube-config:/home/backenduser/.kube
@@ -38,44 +38,43 @@ services:
     networks:
       - backend-net
 
-  traefik:
-    image: traefik:v2
-    container_name: traefik
-    restart: unless-stopped
-    command:
-      # provider
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      # metrics
-      - "--metrics.prometheus=true"
-      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
-      - "--log.level=DEBUG"
-      # logs
-      - "--accesslog=true"
-      # entrypoints
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      # certificatesresolvers
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    expose:
-      - "8080"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - traefik_letsencrypt:/letsencrypt
-    networks:
-      - backend-net
+  #  traefik:
+  #    image: traefik:v2
+  #    container_name: traefik
+  #    restart: unless-stopped
+  #    command:
+  #      # provider
+  #      - "--providers.docker=true"
+  #      - "--providers.docker.exposedbydefault=false"
+  #      # metrics
+  #      - "--metrics.prometheus=true"
+  #      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
+  #      - "--log.level=DEBUG"
+  #      # logs
+  #      - "--accesslog=true"
+  #      # entrypoints
+  #      - "--entrypoints.web.address=:80"
+  #      - "--entrypoints.websecure.address=:443"
+  #      # certificatesresolvers
+  #      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+  #      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+  #      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+  #      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  #    expose:
+  #      - "8080"
+  #    ports:
+  #      - "80:80"
+  #      - "443:443"
+  #    volumes:
+  #      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  #      - traefik_letsencrypt:/letsencrypt
+  #    networks:
+  #      - backend-net
 
 volumes:
   traefik_letsencrypt:
   repos-data:
   kube-config:
-  traefik-cert:
 
 networks:
   backend-net:
