@@ -26,6 +26,10 @@ def main():
             text=True
         )
 
+        # Add kubectl error logging for check command
+        if check.returncode != 0:
+            sys.stderr.write(f"kubectl check error: {check.stderr.strip()}\n")
+
         if check.returncode == 0:
             print(json.dumps({
                 "status": "exists",
@@ -53,6 +57,7 @@ def main():
         print(json.dumps({
             "status": "error", 
             "message": create.stderr.strip(),
+            "kubectl_error": create.stderr.strip(),  # Explicit error field
             "namespace": namespace
         }))
         sys.exit(1)
@@ -60,7 +65,8 @@ def main():
     except Exception as e:
         print(json.dumps({
             "status": "error",
-            "message": f"Script execution failed: {str(e)}"
+            "message": f"Script execution failed: {str(e)}",
+            "python_error": str(e)
         }))
         sys.exit(1)
 
