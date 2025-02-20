@@ -19,7 +19,8 @@ RUN apk add --no-cache \
     git \
     bash \
     jq \
-    libc6-compat
+    libc6-compat \
+    py3-cryptography
 
 # Install security tools
 RUN apk add --no-cache --virtual .security-deps \
