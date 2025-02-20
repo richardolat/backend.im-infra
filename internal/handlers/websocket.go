@@ -12,19 +12,21 @@ import (
 
 type WebSocketHandler struct {
     upgrader         websocket.Upgrader
-    namespaceService *services.NamespaceService  // Correct field name
+    namespaceService *services.NamespaceService
+    testService      *services.TestService
 }
 
-func NewWebSocketHandler(namespaceService *services.NamespaceService) *WebSocketHandler {
+func NewWebSocketHandler(ns *services.NamespaceService, ts *services.TestService) *WebSocketHandler {
     return &WebSocketHandler{
         upgrader: websocket.Upgrader{
             ReadBufferSize:  1024,
             WriteBufferSize: 1024,
             CheckOrigin: func(r *http.Request) bool {
-                return true  // Adjust origin validation for production
+                return true
             },
         },
-        namespaceService: namespaceService,  // Remove gitService reference
+        namespaceService: ns,
+        testService:      ts,
     }
 }
 
@@ -39,42 +41,53 @@ func (h *WebSocketHandler) HandleConnection(c *gin.Context) {
     log.Printf("New WebSocket connection established from %s", c.Request.RemoteAddr)
 
     for {
-        messageType, rawMessage, err := conn.ReadMessage()
+        _, rawMessage, err := conn.ReadMessage()
         if err != nil {
-            log.Printf("Error reading message from %s: %v", c.Request.RemoteAddr, err)
+            log.Printf("Error reading message: %v", err)
             break
         }
 
-        log.Printf("[%s] Raw message received (type: %d): %s", 
-            c.Request.RemoteAddr, 
-            messageType, 
-            string(rawMessage))
-
         var gitMsg models.GitMessage
         if err := json.Unmarshal(rawMessage, &gitMsg); err != nil {
-            log.Printf("[%s] Error parsing JSON: %v", c.Request.RemoteAddr, err)
-            log.Printf("[%s] Invalid JSON content: %s", c.Request.RemoteAddr, string(rawMessage))
+            log.Printf("Invalid message format: %v", err)
             sendError(conn, "Invalid message format")
             continue
         }
 
-        log.Printf("[%s] Parsed message: %+v", c.Request.RemoteAddr, gitMsg)
-
         // Handle namespace operations
-        result, err := h.namespaceService.HandleNamespace(gitMsg.ChatID, gitMsg.UserID)
+        nsResult, err := h.namespaceService.HandleNamespace(gitMsg.ChatID, gitMsg.UserID)
         if err != nil {
-            log.Printf("[%s] Namespace operation failed: %v", c.Request.RemoteAddr, err)
-            sendError(conn, "Namespace operation failed: "+err.Error())
+            log.Printf("Namespace error: %v", err)
+            sendError(conn, "Namespace error: "+err.Error())
             continue
         }
 
+        namespace, ok := nsResult["namespace"].(string)
+        if !ok || namespace == "" {
+            log.Printf("Invalid namespace response: %v", nsResult)
+            sendError(conn, "Invalid namespace received")
+            continue
+        }
+
+        // Execute tests
+        testResult, err := h.testService.RunTests(namespace, gitMsg.RepoURL, gitMsg.CommitHash)
+        if err != nil {
+            log.Printf("Test error: %v", err)
+            sendError(conn, "Test execution failed: "+err.Error())
+            continue
+        }
+
+        // Send combined response
         response := models.Response{
-            Type:    "namespace_status",
-            Payload: result,
+            Type: "test_results",
+            Payload: map[string]interface{}{
+                "namespace_status": nsResult,
+                "test_results":     testResult,
+            },
         }
 
         if err := conn.WriteJSON(response); err != nil {
-            log.Printf("Error writing response: %v", err)
+            log.Printf("Error sending response: %v", err)
             break
         }
     }
