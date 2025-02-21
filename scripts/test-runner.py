@@ -38,8 +38,10 @@ class TestRunner:
             )
             return result
         except subprocess.CalledProcessError as e:
+            # Capture full command with quotes
+            err_cmd = ' '.join([f"'{arg}'" if ' ' in arg else arg for arg in full_command])
             self.result["output"]["kubectl_errors"].append({
-                "command": ' '.join(full_command),
+                "command": err_cmd,
                 "error": e.stderr.strip()
             })
             raise
@@ -55,12 +57,16 @@ class TestRunner:
             self._add_step("Locating pod", "setup")
             result = self.run_kubectl(["get", "pod", "-l", "app=test-pod", "-o", "jsonpath={.items[0].metadata.name}"])
             self.pod_name = result.stdout.strip()
+            
+            # Wait for pod to be fully ready
+            self._add_step("Awaiting pod readiness", "pod_ready")
+            self.run_kubectl(["wait", "--for=condition=Ready", "pod", self.pod_name, "--timeout=180s"])
             self._add_step("Pod ready", "setup_complete")
 
             # Clone and checkout
             self._add_step("Cloning repository", "source_setup")
-            self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
-                            f"rm -rf /app/repo && git clone {self.repo_url} /app/repo"])
+            clone_cmd = f"rm -rf /app/repo && git clone '{self.repo_url}' /app/repo"
+            self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", clone_cmd])
             self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
                             f"cd /app/repo && git checkout {self.commit}"])
 
@@ -71,8 +77,8 @@ class TestRunner:
 
             # Run tests
             self._add_step("Executing tests", "test_execution")
-            test_result = self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
-                                          f"cd /app/repo && {self.test_cmd}"])
+            test_cmd = f"cd /app/repo && ({self.test_cmd})"  # Wrap in subshell
+            test_result = self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", test_cmd])
             
             # Capture results
             self.result["output"]["stdout"] = test_result.stdout
