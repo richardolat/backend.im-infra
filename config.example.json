@@ -1,0 +1,8 @@
+{
+    "repo_url": "YOUR_GITHUB_REPO_URL_HERE",
+    "commits": [
+        "FIRST_COMMIT_HASH_HERE",
+        "SECOND_COMMIT_HASH_HERE",
+        "THIRD_COMMIT_HASH_HERE"
+    ]
+}

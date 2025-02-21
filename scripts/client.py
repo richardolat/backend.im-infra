@@ -3,6 +3,7 @@ import json
 import time
 import signal
 import sys
+import os
 from datetime import datetime
 from colorama import Fore, Style, init
 from websocket import WebSocketApp
@@ -10,10 +11,11 @@ from websocket import WebSocketApp
 init(autoreset=True)
 
 class TestClient:
-    def __init__(self, repo_url: str, commits: list):
+    def __init__(self):
+        config = self.load_config()
         self.ws_url = "ws://brain.obimadu.pro/ws"
-        self.repo_url = repo_url
-        self.commits = commits
+        self.repo_url = config["repo_url"]
+        self.commits = config["commits"]
         self.results = []
         self.current_commit = None
         self.start_time = None
@@ -135,15 +137,19 @@ class TestClient:
         self.print_summary()
         sys.exit(0)
 
+    def load_config(self):
+        config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
+        try:
+            with open(config_path) as f:
+                return json.load(f)
+        except FileNotFoundError:
+            print(f"{Fore.RED}❌ Config file not found: {config_path}")
+            print(f"{Fore.YELLOW}Create config.json from config.example.json")
+            sys.exit(1)
+        except json.JSONDecodeError:
+            print(f"{Fore.RED}❌ Invalid JSON in config file")
+            sys.exit(1)
+
 if __name__ == "__main__":
-    commits = [
-        "2acf0f9a74b83bc881aa2f06235b8c927892d28a",
-        "invalidcommit1234567890abcdefghijklmnop",
-        "d0d0caca1bcd1234abcd5678efab1234cafed00d"
-    ]
-    
-    client = TestClient(
-        repo_url="https://github.com/obiMadu/hng12-stage2",
-        commits=commits
-    )
+    client = TestClient()
     client.run()
