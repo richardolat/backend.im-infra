@@ -107,30 +107,40 @@ class TestClient:
         self.print_summary()
 
     def print_summary(self):
-        print(f"\n{Fore.CYAN}📊 Test Summary")
-        print(f"{Fore.YELLOW}┌{'─'*78}┐")
-
+        print(f"\n{Fore.CYAN}📊 Test Summary Report")
+        print(f"{Fore.MAGENTA}╒{'═'*78}╕")
+        
         total = len(self.results)
         success = sum(1 for r in self.results if r["status"] == "test_results")
-        avg_time = sum(r["time"] for r in self.results) / total if total > 0 else 0
+        failures = total - success
+        total_time = sum(r["time"] for r in self.results)
+        avg_time = total_time / total if total > 0 else 0
 
-        print(
-            f"{Fore.YELLOW}│ {Fore.WHITE}Total: {total:<4} "
-            + f"{Fore.GREEN}Success: {success:<4} "
-            + f"{Fore.RED}Failed: {total - success:<4} "
-            + f"{Fore.WHITE}Avg Time: {avg_time:.2f}s"
-        )
+        # Header
+        print(f"{Fore.MAGENTA}│ {Fore.WHITE}Total Tests: {Fore.CYAN}{total} | " +
+              f"{Fore.GREEN}✓ Passed: {success} | " +
+              f"{Fore.RED}✗ Failed: {failures} | " +
+              f"{Fore.YELLOW}⏱ Avg Time: {avg_time:.2f}s")
+        print(f"{Fore.MAGENTA}├{'─'*78}┤")
 
-        print(f"{Fore.YELLOW}├{'─'*78}┤")
-        for result in self.results:
+        # Individual results
+        for idx, result in enumerate(self.results, 1):
             color = Fore.GREEN if result["status"] == "test_results" else Fore.RED
-            print(
-                f"{Fore.YELLOW}│ {color}◼ {result['commit'][:7]} "
-                + f"{Fore.WHITE}{result['time']:.2f}s "
-                + f"{color}{result['status']}"
-            )
+            symbol = "✓" if result["status"] == "test_results" else "✗"
+            
+            print(f"{Fore.MAGENTA}│ {Fore.WHITE}{idx:03d} {color}{symbol} " +
+                  f"{Fore.CYAN}{result['commit'][:7]} " +
+                  f"{Fore.WHITE}→ {color}{result['status'][:15].ljust(15)} " +
+                  f"{Fore.YELLOW}{result['time']:>5.2f}s")
+            
+            # Print commit message if available
+            if "commit_message" in result.get("response", {}).get("test_results", {}):
+                msg = result["response"]["test_results"]["commit_message"]
+                print(f"{Fore.MAGENTA}│   {Fore.WHITE}📝 {msg[:70].ljust(70)}")
 
-        print(f"{Fore.YELLOW}└{'─'*78}┘\n")
+        # Footer
+        print(f"{Fore.MAGENTA}╘{'═'*78}╛")
+        print(f"{Fore.YELLOW}✨ Test session finished - {total} runs completed in {total_time:.2f} seconds ✨\n")
 
     def run(self):
         self.print_header()
