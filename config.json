@@ -1,8 +1,8 @@
 {
-    "repo_url": "https://github.com/obiMadu/hng12-stage2",
-    "commits": [
-        "2acf0f9a74b83bc881aa2f06235b8c927892d28a",
-        "d0d0caca1bcd1234abcd5678efab1234cafed00d",
-        "anothercommithashhere1234567890abcdef"
-    ]
+  "ws_url": "ws://brain.obimadu.pro/ws",
+  "repo_url": "https://git.obimadu.pro/backend.im/fastapi-app",
+  "commits": [
+    "ef66f332efd861a3882c42b88e55ee6c07ae9210",
+    "03a6160b09ac79ef971be320360979ef61f1033d"
+  ]
 }
