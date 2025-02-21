@@ -16,6 +16,9 @@ class TestClient:
         config = self.load_config()
         self.ws_url = config["ws_url"]
         self.repo_url = config["repo_url"]
+        self.user_id = config["user_id"]
+        self.chat_id = config["chat_id"]
+        self.project_type = config["project_type"]
         self.commits = config["commits"]
         self.results = []
         self.current_commit = None
@@ -40,11 +43,11 @@ class TestClient:
             self.current_commit = self.commits.pop(0)
             self.start_time = time.time()
             msg = {
-                "userId": "user-6",
-                "chatId": "chat-6",
+                "userId": self.user_id,
+                "chatId": self.chat_id,
                 "repoURL": self.repo_url,
                 "commitHash": self.current_commit,
-                "projectType": "fastapi",
+                "projectType": self.project_type,
             }
             self.ws.send(json.dumps(msg))
             print(f"{Fore.WHITE}📤 Sent: {Fore.YELLOW}{self.current_commit[:7]}")
