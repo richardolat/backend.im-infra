@@ -1,9 +1,9 @@
 {
-    "repo_url": "YOUR_GITHUB_REPO_URL_HERE",
-    "commits": [
-        "FIRST_COMMIT_HASH_HERE",
-        "SECOND_COMMIT_HASH_HERE",
-        "THIRD_COMMIT_HASH_HERE"
-    ],
-    "test_command": "pytest tests/"
+    "ws_url": "ws://brain.obimadu.pro/ws",
+    "repo_url": "https://git.obimadu.pro/your-service-repo.git",
+    "user_id": "your-service-account",
+    "chat_id": "deployment-tracker",
+    "project_type": "fastapi",
+    "test_command": "pytest -v tests/e2e/",
+    "commits": ["HEAD~2", "HEAD~1", "HEAD"]
 }
