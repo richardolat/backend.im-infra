@@ -7,11 +7,12 @@ import time
 from typing import Dict, Any, List
 
 class TestRunner:
-    def __init__(self, namespace: str, repo_url: str, commit: str, test_cmd: str):
+    def __init__(self, namespace: str, repo_url: str, commit: str, test_cmd: str, project_type: str):
         self.namespace = namespace
         self.repo_url = repo_url
         self.commit = commit
         self.test_cmd = test_cmd
+        self.project_type = project_type
         self.pod_name = ""
         self.result: Dict[str, Any] = {
             "commit": commit,
@@ -25,7 +26,7 @@ class TestRunner:
             }
         }
 
-    def run_kubectl(self, command: List[str]) -> subprocess.CompletedProcess:
+    def run_kubectl(self, command: List[str], check: bool = True) -> subprocess.CompletedProcess:
         """Execute kubectl command and capture output"""
         full_command = ["kubectl", "-n", self.namespace] + command
         try:
@@ -33,7 +34,7 @@ class TestRunner:
                 full_command,
                 capture_output=True,
                 text=True,
-                check=True
+                check=check
             )
             return result
         except subprocess.CalledProcessError as e:
@@ -92,7 +93,7 @@ class TestRunner:
         finally:
             # Cleanup
             self._add_step("Cleaning up", "cleanup")
-            self.run_kubectl(["delete", "-f", "deployments/templates/test-pod.yaml"], check=False)
+            self.run_kubectl(["delete", "-f", f"deployments/templates/{self.project_type}/test-pod.yaml"], check=False)
             self.result["duration"] = round(time.time() - start_time, 2)
         
         return self.result
@@ -118,7 +119,8 @@ def main():
         namespace=args.namespace,
         repo_url=args.repo_url,
         commit=args.commit,
-        test_cmd=args.test_cmd
+        test_cmd=args.test_cmd,
+        project_type="fastapi"  # Default to fastapi for now
     )
     
     result = runner.execute_test_run()
