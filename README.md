@@ -39,8 +39,8 @@ sequenceDiagram
 ### 1. Clone and Prepare
 
 ```bash
-git clone https://git.obimadu.pro/your-repo.git
-cd automated-testing
+git clone https://github.com/obiMadu/backend.im-infra
+cd backend.im-infra
 ```
 
 ### 2. Server Setup
@@ -77,7 +77,7 @@ python3 scripts/client.py
 
 ```json
 {
-  "ws_url": "ws://your-server:8080/ws",
+  "ws_url": "ws://your-server-url/ws",
   "repo_url": "https://github.com/your/repo.git",
   "user_id": "your-user-id",
   "chat_id": "your-chat-id",
