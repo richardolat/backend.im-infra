@@ -40,8 +40,8 @@ class TestClient:
             self.current_commit = self.commits.pop(0)
             self.start_time = time.time()
             msg = {
-                "userId": "user-123",
-                "chatId": "chat-456",
+                "userId": "user-6",
+                "chatId": "chat-6",
                 "repoURL": self.repo_url,
                 "commitHash": self.current_commit,
                 "projectType": "fastapi",

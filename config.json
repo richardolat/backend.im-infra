@@ -1,5 +1,5 @@
 {
-  "ws_url": "ws://brain.obimadu.pro/ws",
+  "ws_url": "ws://localhost:8080/ws",
   "repo_url": "https://git.obimadu.pro/backend.im/fastapi-app",
   "commits": [
     "ef66f332efd861a3882c42b88e55ee6c07ae9210",
