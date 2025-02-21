@@ -4,14 +4,15 @@ import signal
 import sys
 from websocket import WebSocketApp
 
+
 def main():
     # Configure WebSocket connection
-    ws_url = "ws://localhost:8080/ws"
+    ws_url = "ws://brain.obimadu.pro/ws"
     message = {
-        "userId": "someId",
-        "chatId": "chatId",
+        "userId": "userId-4",
+        "chatId": "chatId-4",
         "repoURL": "https://github.com/obiMadu/hng12-stage2",
-        "commitHash": "2acf0f9a74b83bc881aa2f06235b8c927892d28a"
+        "commitHash": "2acf0f9a74b83bc881aa2f06235b8c927892d28a",
     }
 
     # Configure graceful shutdown
@@ -48,14 +49,17 @@ def main():
 
     # Create and run WebSocket client
     print("Starting WebSocket client...")
-    ws = WebSocketApp(ws_url,
-                      on_open=on_open,
-                      on_message=on_message,
-                      on_error=on_error,
-                      on_close=on_close)
+    ws = WebSocketApp(
+        ws_url,
+        on_open=on_open,
+        on_message=on_message,
+        on_error=on_error,
+        on_close=on_close,
+    )
 
     print("Press Ctrl+C to exit")
     ws.run_forever()
+
 
 if __name__ == "__main__":
     main()
