@@ -20,7 +20,7 @@ class TestClient:
         self.chat_id = config["chat_id"]
         self.project_type = config["project_type"]
         self.commits = config["commits"]
-        self.test_command = os.environ.get("TEST_CMD", "")
+        self.test_command = config.get("test_command", "pytest tests/")
         self.results = []
         self.current_commit = None
         self.start_time = None

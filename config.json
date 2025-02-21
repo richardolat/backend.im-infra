@@ -7,5 +7,6 @@
   "commits": [
     "ef66f332efd861a3882c42b88e55ee6c07ae9210",
     "03a6160b09ac79ef971be320360979ef61f1033d"
-  ]
+  ],
+  "test_command": "pytest tests/"
 }

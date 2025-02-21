@@ -16,6 +16,16 @@ def main():
         chat_id, user_id, project_type = sys.argv[1], sys.argv[2], sys.argv[3].lower()
         namespace = f"im-{chat_id}-{user_id}".lower()
         yaml_path = f"deployments/templates/{project_type}/test-pod.yaml"
+
+        # Validate YAML file exists
+        if not os.path.exists(yaml_path):
+            print(json.dumps({
+                "status": "error",
+                "message": f"Missing deployment template for {project_type}",
+                "details": f"Could not find {yaml_path}"
+            }))
+            sys.exit(1)
+
         timestamp = datetime.utcnow().isoformat() + "Z"
 
         # Check namespace existence

@@ -4,5 +4,6 @@
         "FIRST_COMMIT_HASH_HERE",
         "SECOND_COMMIT_HASH_HERE",
         "THIRD_COMMIT_HASH_HERE"
-    ]
+    ],
+    "test_command": "pytest tests/"
 }
