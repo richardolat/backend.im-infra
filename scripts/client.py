@@ -104,11 +104,11 @@ class TestClient:
 
     def on_close(self, ws, status, msg):
         print(f"\n{Fore.CYAN}🔌 Connection closed")
-        self.print_summary()
+        # Removed the print_summary() call from here
 
     def print_summary(self):
         print(f"\n{Fore.CYAN}📊 Test Summary Report")
-        print(f"{Fore.MAGENTA}╒{'═'*78}╕")
+        print(f"{Fore.MAGENTA}╭{'─'*78}╮")
         
         total = len(self.results)
         success = sum(1 for r in self.results if r["status"] == "test_results")
@@ -117,30 +117,33 @@ class TestClient:
         avg_time = total_time / total if total > 0 else 0
 
         # Header
-        print(f"{Fore.MAGENTA}│ {Fore.WHITE}Total Tests: {Fore.CYAN}{total} | " +
-              f"{Fore.GREEN}✓ Passed: {success} | " +
-              f"{Fore.RED}✗ Failed: {failures} | " +
-              f"{Fore.YELLOW}⏱ Avg Time: {avg_time:.2f}s")
+        print(f"{Fore.MAGENTA}│ {Fore.WHITE}🚀 Total Tests: {Fore.CYAN}{total:<4} "
+              f"{Fore.GREEN}✅ Passed: {success:<4} "
+              f"{Fore.RED}❌ Failed: {failures:<4} "
+              f"{Fore.YELLOW}⏳ Avg Time: {avg_time:.2f}s")
         print(f"{Fore.MAGENTA}├{'─'*78}┤")
 
         # Individual results
         for idx, result in enumerate(self.results, 1):
             color = Fore.GREEN if result["status"] == "test_results" else Fore.RED
-            symbol = "✓" if result["status"] == "test_results" else "✗"
+            symbol = "✅" if result["status"] == "test_results" else "❌"
             
-            print(f"{Fore.MAGENTA}│ {Fore.WHITE}{idx:03d} {color}{symbol} " +
-                  f"{Fore.CYAN}{result['commit'][:7]} " +
-                  f"{Fore.WHITE}→ {color}{result['status'][:15].ljust(15)} " +
-                  f"{Fore.YELLOW}{result['time']:>5.2f}s")
+            line = (f"{Fore.MAGENTA}│ {Fore.WHITE}{idx:03d} {color}{symbol} "
+                    f"{Fore.CYAN}{result['commit'][:7]} "
+                    f"{Fore.WHITE}➔ {color}{result['status'].upper():<15} "
+                    f"{Fore.YELLOW}{result['time']:>5.2f}s")
+            print(line)
             
             # Print commit message if available
             if "commit_message" in result.get("response", {}).get("test_results", {}):
                 msg = result["response"]["test_results"]["commit_message"]
-                print(f"{Fore.MAGENTA}│   {Fore.WHITE}📝 {msg[:70].ljust(70)}")
+                truncated = (msg[:68] + '...') if len(msg) > 71 else msg.ljust(71)
+                print(f"{Fore.MAGENTA}│   {Fore.WHITE}📝 {truncated}")
 
         # Footer
-        print(f"{Fore.MAGENTA}╘{'═'*78}╛")
-        print(f"{Fore.YELLOW}✨ Test session finished - {total} runs completed in {total_time:.2f} seconds ✨\n")
+        print(f"{Fore.MAGENTA}╰{'─'*78}╯")
+        print(f"{Fore.YELLOW}✨ Test session completed - {total} runs in {total_time:.2f}s ✨")
+        print(f"{Fore.CYAN}🔗 Namespace: {self.chat_id}-{self.user_id}\n")
 
     def run(self):
         self.print_header()
@@ -156,9 +159,9 @@ class TestClient:
         self.ws.run_forever()
 
     def shutdown(self):
-        print(f"\n{Fore.RED}🛑 Shutting down...")
+        print(f"\n{Fore.RED}🛑 Graceful shutdown initiated...")
         self.ws.close()
-        self.print_summary()
+        self.print_summary()  # Only one call to print_summary
         sys.exit(0)
 
     def load_config(self):
