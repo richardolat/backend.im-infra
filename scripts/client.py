@@ -20,6 +20,7 @@ class TestClient:
         self.chat_id = config["chat_id"]
         self.project_type = config["project_type"]
         self.commits = config["commits"]
+        self.test_command = os.environ.get("TEST_CMD", "")
         self.results = []
         self.current_commit = None
         self.start_time = None
@@ -48,6 +49,7 @@ class TestClient:
                 "repoURL": self.repo_url,
                 "commitHash": self.current_commit,
                 "projectType": self.project_type,
+                "testCommand": self.test_command or None
             }
             self.ws.send(json.dumps(msg))
             print(f"{Fore.WHITE}📤 Sent: {Fore.YELLOW}{self.current_commit[:7]}")
