@@ -30,10 +30,6 @@ func (s *TestService) RunTests(namespace, repoURL, commit, testCmd string) (map[
 		cmdArgs = append(cmdArgs, "-t", testCmd)
 	}
 
-	if testCmd != "" {
-		cmdArgs = append(cmdArgs, "-t", testCmd)
-	}
-
 	log.Printf("Executing test command: %v", cmdArgs)
 	cmd := exec.Command("python3", cmdArgs...)
 	output, err := cmd.CombinedOutput()
