@@ -3,6 +3,7 @@ set -e
 
 # Pull latest code
 cd "$(dirname "$0")/.."
+git reset --hard HEAD
 git pull origin main
 
 # Build and restart Docker container
