@@ -70,7 +70,7 @@ func (h *WebSocketHandler) HandleConnection(c *gin.Context) {
         }
 
         // Execute tests
-        testResult, err := h.testService.RunTests(namespace, gitMsg.RepoURL, gitMsg.CommitHash)
+        testResult, err := h.testService.RunTests(namespace, gitMsg.RepoURL, gitMsg.CommitHash, gitMsg.TestCmd)
         if err != nil {
             log.Printf("Test error: %v", err)
             sendError(conn, "Test execution failed: "+err.Error())

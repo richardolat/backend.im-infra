@@ -6,6 +6,7 @@ type GitMessage struct {
     RepoURL     string `json:"repoURL"`
     CommitHash  string `json:"commitHash"`
     ProjectType string `json:"projectType"`
+    TestCmd     string `json:"testCommand,omitempty"`
 }
 
 type Response struct {
