@@ -18,12 +18,20 @@ func NewTestService() *TestService {
 	}
 }
 
-func (s *TestService) RunTests(namespace, repoURL, commit string) (map[string]interface{}, error) {
-	cmd := exec.Command("python3", s.ScriptPath,
+func (s *TestService) RunTests(namespace, repoURL, commit, testCmd string) (map[string]interface{}, error) {
+	cmdArgs := []string{
+		s.ScriptPath,
 		"-n", namespace,
 		"-r", repoURL,
 		"-c", commit,
-	)
+	}
+
+	if testCmd != "" {
+		cmdArgs = append(cmdArgs, "-t", testCmd)
+	}
+
+	log.Printf("Executing test command: %v", cmdArgs)
+	cmd := exec.Command("python3", cmdArgs...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("Test execution failed. Raw output:\n%s", string(output))
