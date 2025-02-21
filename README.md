@@ -27,6 +27,58 @@ sequenceDiagram
     Server->>Client: Return results
 ```
 
+## 📂 Project Structure
+
+```
+backend.im-infra/
+├── deployments/               # Kubernetes deployment templates
+│   └── templates/
+│       └── fastapi/           # FastAPI-specific resources
+│           ├── Dockerfile     # Base image for FastAPI test pods
+│           └── test-pod.yaml  # Pod specification for FastAPI tests
+
+├── scripts/                   # Operational scripts
+│   ├── git_handler.sh         # Handles repo cloning/checkout
+│   ├── healthcheck.sh         # Service health monitoring
+│   ├── install-awscli.sh      # AWS CLI setup in containers
+│   ├── install-kubectl.sh     # Kubectl installation
+│   ├── kube-init.sh           # Cluster connection bootstrap
+│   ├── namespace_handler.py   # K8s namespace management
+│   └── test-runner.py         # Core test execution logic
+
+├── app/                       # Example FastAPI service (test subject)
+│   ├── main.py                # Sample API endpoints
+│   ├── tests/                 # Test cases for example service
+│   │   ├── test_success.py    # Valid test cases
+│   │   └── test_fail.py       # Intentional failure cases
+│   └── pyproject.toml         # Python project config
+
+├── internal/                  # Go server implementation
+│   ├── handlers/              # WebSocket connection handling
+│   │   └── websocket.go       # WS message processing
+│   ├── models/                # Data structures
+│   │   └── message.go         # WS message formats
+│   └── services/              # Core business logic
+│       ├── namespace_service.go # K8s ns operations
+│       └── test_service.go    # Test execution orchestration
+
+├── cmd/                       # Server entrypoints
+│   └── server/
+│       └── main.go            # WebSocket server main
+
+├── config/                    # Configuration files
+│   ├── config.json            # Active configuration
+│   └── config.example.json    # Configuration template
+
+├── docker/                    # Container definitions
+│   ├── Dockerfile             # Main application image
+│   └── docker-compose.yml     # Local development setup
+
+└── .github/
+    └── workflows/             # CI/CD pipelines
+        └── cd.yml             # Deployment automation
+```
+
 ## 🛠 Prerequisites
 
 - Kubernetes cluster (Docker Desktop K8s works)
