@@ -63,12 +63,31 @@ class TestRunner:
             self.run_kubectl(["wait", "--for=condition=Ready", "pod", self.pod_name, "--timeout=180s"])
             self._add_step("Pod ready", "setup_complete")
 
-            # Clone and checkout
-            self._add_step("Cloning repository", "source_setup")
-            clone_cmd = f"rm -rf /app/repo && git clone '{self.repo_url}' /app/repo"
-            self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", clone_cmd])
-            self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
-                            f"cd /app/repo && git checkout {self.commit}"])
+            # Check if repo exists
+            self._add_step("Checking repository status", "repo_check")
+            repo_exists = self.run_kubectl(
+                ["exec", self.pod_name, "--", "sh", "-c", "test -d /app/repo/.git && echo exists"],
+                check=False
+            ).stdout.strip() == "exists"
+
+            if repo_exists:
+                # Update existing repo
+                self._add_step("Updating repository", "repo_update")
+                self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
+                                "cd /app/repo && git fetch origin && git reset --hard origin/main"])
+            else:
+                # Clone new repo
+                self._add_step("Cloning repository", "repo_clone")
+                self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
+                                f"git clone '{self.repo_url}' /app/repo"])
+
+            # Checkout specific commit
+            self._add_step("Checking out commit", "commit_checkout")
+            checkout_result = self.run_kubectl(["exec", self.pod_name, "--", "sh", "-c", 
+                              f"cd /app/repo && git checkout {self.commit} && git log -1 --pretty=format:%s"])
+            commit_message = checkout_result.stdout.strip()
+            self.result["commit_message"] = commit_message
+            self._add_step(f"Checked out: {commit_message}", "commit_verified")
 
             # Install dependencies
             self._add_step("Installing dependencies", "dependencies")
@@ -97,9 +116,6 @@ class TestRunner:
             self.result["status"] = "error"
             self.result["output"]["stderr"] = str(e)
         finally:
-            # Cleanup
-            self._add_step("Cleaning up", "cleanup")
-            self.run_kubectl(["delete", "-f", f"deployments/templates/{self.project_type}/test-pod.yaml"], check=False)
             self.result["duration"] = round(time.time() - start_time, 2)
         
         return self.result
